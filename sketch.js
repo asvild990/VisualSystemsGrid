@@ -6,9 +6,11 @@ let fontList = ['Georgia','Verdana','Courier','Arial','Times','Trebuchet MS','Im
 let fontIndex = [];
 let cellGraphics = [];
 let showGrid = true;
+let canvasSize;
 
 function setup() {
-  createCanvas(800, 800);
+  canvasSize = min(windowWidth, windowHeight);
+  createCanvas(canvasSize, canvasSize);
   cellW = width / cols;
   cellH = height / rows;
 
@@ -38,9 +40,25 @@ function draw() {
 }
 
 function mousePressed() {
-  let i = int(mouseX / cellW);
-  let j = int(mouseY / cellH);
-  if (i >= 0 && i < cols && j >= 0 && j < rows) {
+  let centerI = int(mouseX / cellW);
+  let centerJ = int(mouseY / cellH);
+  let affected = [];
+
+  for (let di = -2; di <= 2; di++) {
+    for (let dj = -2; dj <= 2; dj++) {
+      let i = centerI + di;
+      let j = centerJ + dj;
+      if (i >= 0 && i < cols && j >= 0 && j < rows) {
+        affected.push({i, j});
+      }
+    }
+  }
+
+  shuffle(affected, true);
+  let numToChange = int(random(3, 6));
+  for (let k = 0; k < min(numToChange, affected.length); k++) {
+    let i = affected[k].i;
+    let j = affected[k].j;
     let current = fontIndex[i][j];
     let newIndex = current;
     while (newIndex === current) {
@@ -72,5 +90,14 @@ function createCell(i, j, fontIdx) {
 }
 
 function windowResized() {
-  resizeCanvas(800, 800);
+  canvasSize = min(windowWidth, windowHeight);
+  resizeCanvas(canvasSize, canvasSize);
+  cellW = width / cols;
+  cellH = height / rows;
+
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      cellGraphics[i][j] = createCell(i, j, fontIndex[i][j]);
+    }
+  }
 }
